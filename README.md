@@ -133,6 +133,25 @@ account, plus 7 days, 256 MiB per account, and 25 MiB per media file. See the
 [local quote cache guide](./docs/quote-cache_zh_CN.md) for the complete configuration,
 storage behavior, and validation details.
 
+## Standalone CLI (without OpenClaw)
+
+`cli/` has a small command line tool.
+It sends WeChat messages without OpenClaw.
+
+```bash
+npm run build:cli
+npm run cli -- login          # scan the QR code with WeChat
+npm run cli -- listen         # keep running; message the bot once from WeChat
+npm run cli -- send "hello"   # send to the WeChat user who scanned
+echo "done" | npm run cli -- send -
+npm run cli -- status
+```
+
+Each send needs a `context_token` from an inbound message.
+So message the bot once while `listen` runs, and keep `listen` running in the background.
+State is saved in `~/.weixin-cli/state.json` (override with `WEIXIN_CLI_STATE_DIR`).
+See [cli/README.md](./cli/README.md) for details.
+
 ## Uninstall
 
 ```bash

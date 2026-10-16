@@ -127,6 +127,24 @@ openclaw config set session.dmScope per-account-channel-peer
 每个账号最多 10,000 条；媒体缓存保留 7 天、每个账号最多 256 MiB、单个文件最多 25 MiB。
 完整配置、存储行为和验证说明见[引用消息本地缓存开发说明](./docs/quote-cache_zh_CN.md)。
 
+## 独立 CLI（不依赖 OpenClaw）
+
+`cli/` 下有一个小命令行工具，可以不用 OpenClaw 直接给微信发消息。
+
+```bash
+npm run build:cli
+npm run cli -- login          # 用微信扫码登录
+npm run cli -- listen         # 保持运行；用微信给 bot 发一条消息
+npm run cli -- send "你好"     # 发给扫码的那个微信
+echo "构建完成" | npm run cli -- send -
+npm run cli -- status
+```
+
+每次发送都需要入站消息里的 `context_token`。
+所以要先在 `listen` 运行时给 bot 发一条消息，并让 `listen` 在后台一直运行。
+状态保存在 `~/.weixin-cli/state.json`（可用 `WEIXIN_CLI_STATE_DIR` 修改）。
+详见 [cli/README.md](./cli/README.md)。
+
 ## 卸载
 
 ```bash

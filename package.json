@@ -18,8 +18,8 @@
     "CHANGELOG.zh_CN.md"
   ],
   "scripts": {
-    "format:check": "oxfmt --check src index.ts",
-    "lint": "oxlint src index.ts",
+    "format:check": "oxfmt --check src index.ts cli",
+    "lint": "oxlint src index.ts cli",
     "test:unit": "vitest run --coverage=false",
     "test:coverage": "vitest run --coverage",
     "ci": "npm run format:check && npm run lint && npm run typecheck && npm run test:unit && npm run build",
@@ -27,7 +27,9 @@
     "typecheck": "tsc --noEmit",
     "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
     "build": "npm run clean && tsc",
-    "prepublishOnly": "npm run typecheck && npm run build"
+    "prepublishOnly": "npm run typecheck && npm run build",
+    "build:cli": "tsc -p tsconfig.cli.json",
+    "cli": "node dist/cli/main.js"
   },
   "engines": {
     "node": ">=22.13.0"
