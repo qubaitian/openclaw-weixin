@@ -80,6 +80,35 @@ It does not share state with the OpenClaw plugin (`~/.openclaw`).
 | `send.ts`   | Text send                            |
 | `state.ts`  | State file                           |
 | `main.ts`   | Command line entry                   |
+| `serve.ts`  | Long poll + POST to webhook URL      |
 
 The CLI only imports `src/api/types.ts` and `src/util/random.ts` from the plugin.  
 These two files do not import `openclaw`.
+
+## Webhook service (`serve`)
+
+`serve` long-polls WeChat iLink messages (same loop as `listen`, and still saves context tokens) and POSTs each inbound message as JSON to a Grok Bot / Cursor webhook automation.
+
+### Required env
+
+| Variable | Meaning |
+| --- | --- |
+| `WEIXIN_WEBHOOK_URL` | Automation webhook URL |
+| `WEIXIN_WEBHOOK_AUTH` | Full `Authorization` header, typically `Bearer <YOUR_WEBHOOK_KEY>` |
+
+How to get them in Grok Bot: create a webhook-trigger routine, then open **Webhook URL** / **Webhook key** / **Authorization header** from the automation sidebar.
+
+```bash
+# Login must be done first
+npm run cli -- login
+
+export WEIXIN_WEBHOOK_URL='https://api2.cursor.sh/automations/webhook/<YOUR_WEBHOOK_ID>'
+export WEIXIN_WEBHOOK_AUTH='Bearer <YOUR_WEBHOOK_KEY>'
+npm run cli -- serve
+```
+
+Put secrets in the environment or a mode-`600` local file. Never commit them to the repo.
+
+Failed POSTs are retried 3 times with a short backoff. If `WEIXIN_WEBHOOK_URL` is unset, `serve` logs a warning and keeps listening (context tokens are still saved).
+
+Payload: `{ from_user_id, text, message_type, item_types, create_time, message_id, raw: { to_user_id, session_id, items[] } }`. Context tokens and the bot token are never sent.

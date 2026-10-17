@@ -43,7 +43,13 @@ function printMessage(msg: WeixinMessage): void {
  * `send` needs a fresh token, so keep this running while you use `send`.
  * Mirrors the loop in src/monitor/monitor.ts.
  */
-export async function listen(): Promise<void> {
+export interface ListenOptions {
+  /** Called for each inbound (non-bot) message after its context token is saved. */
+  onMessage?: (msg: WeixinMessage) => Promise<void> | void;
+  label?: string;
+}
+
+export async function listen(opts: ListenOptions = {}): Promise<void> {
   const state = loadState();
   const account = requireAccount(state);
   const auth: BotAuth = { baseUrl: account.baseUrl, token: account.token };
@@ -62,7 +68,7 @@ export async function listen(): Promise<void> {
   await notifyStart(auth).catch((err) => {
     process.stderr.write(`notifyStart failed (ignored): ${String(err)}\n`);
   });
-  process.stdout.write(`Listening as bot=${account.botId}. Press Ctrl+C to stop.\n`);
+  process.stdout.write(`${opts.label ?? "Listening"} as bot=${account.botId}. Press Ctrl+C to stop.\n`);
 
   let timeoutMs: number | undefined;
   let failures = 0;
@@ -92,6 +98,16 @@ export async function listen(): Promise<void> {
         printMessage(msg);
       }
       saveState(state);
+      if (opts.onMessage) {
+        for (const msg of resp.msgs ?? []) {
+          if (msg.message_type === MessageType.BOT) continue;
+          try {
+            await opts.onMessage(msg);
+          } catch (err) {
+            process.stderr.write(`onMessage handler failed: ${String(err)}\n`);
+          }
+        }
+      }
     } catch (err) {
       if (err instanceof StaleTokenError) throw err;
       failures++;

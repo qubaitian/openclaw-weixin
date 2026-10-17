@@ -4,6 +4,7 @@ import { parseArgs } from "node:util";
 import { CLI_VERSION } from "./api.js";
 import { listen } from "./listen.js";
 import { login } from "./login.js";
+import { serve } from "./serve.js";
 import { sendText } from "./send.js";
 import { loadState, resolveStateDir } from "./state.js";
 
@@ -12,6 +13,7 @@ const USAGE = `weixin-cli ${CLI_VERSION}: send WeChat messages without OpenClaw.
 Usage:
   weixin-cli login                    Scan a QR code and save the login.
   weixin-cli listen                   Receive messages and save context tokens.
+  weixin-cli serve                    Like listen, and POST each message to $WEIXIN_WEBHOOK_URL.
   weixin-cli send [--to <id>] <text>  Send text. Use "-" to read text from stdin.
   weixin-cli status                   Show the saved login.
 
@@ -67,6 +69,8 @@ async function main(): Promise<void> {
       return login();
     case "listen":
       return listen();
+    case "serve":
+      return serve();
     case "send": {
       const text = rest.length === 1 && rest[0] === "-" ? await readStdin() : rest.join(" ");
       return sendText({ text, to: values.to });

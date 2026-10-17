@@ -152,6 +152,31 @@ So message the bot once while `listen` runs, and keep `listen` running in the ba
 State is saved in `~/.weixin-cli/state.json` (override with `WEIXIN_CLI_STATE_DIR`).
 See [cli/README.md](./cli/README.md) for details.
 
+### Webhook forward (`serve`)
+
+`serve` long-polls WeChat iLink inbound messages (same loop as `listen`) and POSTs each one as JSON to a Grok Bot / Cursor webhook automation.
+
+**Required env (never put real values in the repo):**
+
+| Variable | Meaning |
+| --- | --- |
+| `WEIXIN_WEBHOOK_URL` | Automation webhook URL (from the Grok Bot sidebar Webhook URL) |
+| `WEIXIN_WEBHOOK_AUTH` | Full `Authorization` header value, typically `Bearer <YOUR_WEBHOOK_KEY>` |
+
+In Grok Bot: create a webhook-trigger routine, then open **Webhook URL** / **Webhook key** / **Authorization header** from that automation's sidebar links.
+
+```bash
+# Log in once first
+npm run cli -- login
+
+export WEIXIN_WEBHOOK_URL='https://api2.cursor.sh/automations/webhook/<YOUR_WEBHOOK_ID>'
+export WEIXIN_WEBHOOK_AUTH='Bearer <YOUR_WEBHOOK_KEY>'
+npm run cli -- serve
+```
+
+Keep secrets in the environment or a mode-`600` local file — never in the repo. See [cli/README.md](./cli/README.md) for details.
+
+
 ## Uninstall
 
 ```bash

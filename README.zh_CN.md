@@ -145,6 +145,31 @@ npm run cli -- status
 状态保存在 `~/.weixin-cli/state.json`（可用 `WEIXIN_CLI_STATE_DIR` 修改）。
 详见 [cli/README.md](./cli/README.md)。
 
+### Webhook 转发（`serve`）
+
+`serve` 会像 `listen` 一样长轮询微信 iLink 入站消息，并把每条消息以 JSON POST 到 Grok Bot / Cursor 的 webhook automation。
+
+**所需环境变量（不要把真实值写进仓库）：**
+
+| 变量 | 含义 |
+| --- | --- |
+| `WEIXIN_WEBHOOK_URL` | automation 的 webhook URL（在 Grok Bot 侧边栏的 Webhook URL） |
+| `WEIXIN_WEBHOOK_AUTH` | 完整的 `Authorization` 头，通常为 `Bearer <YOUR_WEBHOOK_KEY>` |
+
+在 Grok Bot 中：创建一个 webhook 触发的 routine，再从该 automation 侧边栏打开 **Webhook URL** / **Webhook key** / **Authorization header** 获取上述值。
+
+```bash
+# 先登录一次
+npm run cli -- login
+
+export WEIXIN_WEBHOOK_URL='https://api2.cursor.sh/automations/webhook/<YOUR_WEBHOOK_ID>'
+export WEIXIN_WEBHOOK_AUTH='Bearer <YOUR_WEBHOOK_KEY>'
+npm run cli -- serve
+```
+
+密钥应放在环境变量或权限为 `600` 的本地文件中，**切勿**提交到仓库。更多说明见 [cli/README.md](./cli/README.md)。
+
+
 ## 卸载
 
 ```bash
